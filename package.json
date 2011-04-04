@@ -1,0 +1,12 @@
+{
+  "name": "cohort",
+  "description": "Cohort Session Tracking",
+  "version": "0.1.0",
+  "author": "Stanislas Polu <stan@bipsly.com>",
+  "keywords": ["session", "tracking", "pipe", "mongo"],
+  "dependencies": {"fwk": ">= 0.1.4",
+		   "pipe": ">= 0.1.4",
+		   "mongo": ">= 0.1.4" },
+  "bin" : { "cohort" : "./bin/cohort.js" },
+  "engines": { "node": ">=0.4.0" }
+}
