@@ -40,7 +40,7 @@ var cohort = function(spec, my) {
     
     var usage, main, send, forward;
     var uhash, update, writeback;
-    var capture, getlive, getday, cleanup;
+    var capture, getlive, getday, getcounter;
     
     usage = function() {
 	console.log('Usage: cohort <pipereg>');
@@ -134,6 +134,16 @@ var cohort = function(spec, my) {
 			       reply.setBody(res);
 			       send(ctx, reply);
 			   }
+		       });
+		break;
+	    case 'COH:GETCOUNTER-2w':
+		ctx.log.out(msg.toString());
+		getcounter(ctx, msg, function(res) {
+			       if(msg.type() === '2w') {
+				   var reply = fwk.message.reply(msg);
+				   reply.setBody(res);
+				   send(ctx, reply);
+			       }
 		       });
 		break;
 
@@ -262,7 +272,8 @@ var cohort = function(spec, my) {
 	var item = { action: msg.body().action,
 		     date: my.sessions[user].end,
 		     data: msg.body().data		 
-		   };   
+		   };
+
 	if(msg.body().loc && 
 	   Array.isArray(action.body().loc) && 
 	   action.body().loc.length === 2) {
@@ -273,6 +284,66 @@ var cohort = function(spec, my) {
 	}    
 	
 	my.sessions[user].log.push(item);    
+
+	/** update counters */
+	var dstr = item.date.getDate() + 'd' + 
+	    item.date.getMonth() + 'm' + 
+	    item.date.getFullYear() + 'y' ;
+	my.mongo.get(
+	    ctx, 'counters.' + dstr,
+	    function(obj) {
+		if(typeof obj.data === 'undefined')
+		    obj.data = {};
+		if(typeof obj.data[item.action] === 'undefined')
+		    obj.data[item.action] = 0;
+
+		obj.data[item.action] += 1;				
+		my.mongo.set(ctx, 
+			     'counters.' + dstr,
+			     obj._hash,
+			     obj,
+			     function(status) {
+				 ctx.log.debug('INC COUNTER: [' + dstr + '] ' + user + '.' + item.action + ' - ' + status);
+			     });
+	    });
+	var mstr = item.date.getMonth() + 'm' + 
+	    item.date.getFullYear() + 'y';	
+	my.mongo.get(
+	    ctx, 'counters.' + mstr,
+	    function(obj) {
+		if(typeof obj.data === 'undefined')
+		    obj.data = {};
+		if(typeof obj.data[item.action] === 'undefined')
+		    obj.data[item.action] = 0;
+		
+		obj.data[item.action] += 1;				
+		my.mongo.set(ctx, 
+			     'counters.' + mstr,
+			     obj._hash,
+			     obj,
+			     function(status) {
+				 ctx.log.debug('INC COUNTER: [' + mstr + '] ' + user + '.' + item.action + ' - ' + status);
+			     });
+	    });
+	var ystr = item.date.getFullYear() + 'y';	
+	my.mongo.get(
+	    ctx, 'counters.' + ystr,
+	    function(obj) {
+		if(typeof obj.data === 'undefined')
+		    obj.data = {};
+		if(typeof obj.data[item.action] === 'undefined')
+		    obj.data[item.action] = 0;
+		
+		obj.data[item.action] += 1;				
+		my.mongo.set(ctx, 
+			     'counters.' + ystr,
+			     obj._hash,
+			     obj,
+			     function(status) {
+				 ctx.log.debug('INC COUNTER: [' + ystr + '] ' + user + '.' + item.action + ' - ' + status);
+			     });
+	    });
+	
 	
 	uhash(item.makehash());
 	update();
@@ -316,6 +387,64 @@ var cohort = function(spec, my) {
 		      function(result) {
 			  cb_({ sessions: result });
 		      });
+    };
+
+    getcounter = function(ctx, msg, cb_) {
+	if(!msg.body())
+	{ ctx.error(new Error('Invalid req: empty body')); return; }
+        
+	if(typeof msg.body().day === 'undefined')
+	{ ctx.error(new Error('Invalid req: day missing')); return; }    
+	if(typeof msg.body().month === 'undefined')
+	{ ctx.error(new Error('Invalid req: month missing')); return; }    
+	if(typeof msg.body().year === 'undefined')
+	{ ctx.error(new Error('Invalid req: year missing')); return; }
+
+	var day = parseInt(msg.body().day, 10);
+	var month = parseInt(msg.body().month, 10);
+	var year = parseInt(msg.body().year, 10);
+	
+
+	/** update counters */	
+	var mplex = fwk.mplex({});  
+	var res = {};
+
+	(function(cb) {
+	     var dstr = day + 'd' + 
+		 month + 'm' + 
+		 year + 'y' ;
+	     my.mongo.get(
+		 ctx, 'counters.' + dstr,
+		 function(obj) {	
+		     res.day = obj.data;
+		     cb('done');
+		 });	     
+	 })(mplex.callback());
+
+	(function(cb) {
+	     var mstr = month + 'm' + 
+		 year + 'y';	
+	     my.mongo.get(
+		 ctx, 'counters.' + mstr,
+		 function(obj) {	
+		     res.month = obj.data;		     
+		     cb('done');
+		 });	     
+	 })(mplex.callback());
+
+	(function(cb) {
+	     var ystr = year + 'y';	
+	     my.mongo.get(
+		 ctx, 'counters.' + ystr,
+		 function(obj) {	
+		     res.year = obj.data;		     
+		     cb('done');
+		 });	     
+	 })(mplex.callback());
+
+	mplex.go(function() {	     	     
+		     cb_(res);
+		 });	
     };
     
     that.method('main', main);
