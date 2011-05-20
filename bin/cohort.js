@@ -28,7 +28,7 @@ var cohort = function(spec, my) {
     my.logger = fwk.logger();
     
     my.pipe = require('pipe').pipe({});
-    my.mongo = mongo.mongo({ dbname: 'cohort' });
+    my.mongo = mongo.mongo({ dbname: my.cfg['COHORT_DBNAME'] });
 
     my.sessions = {};
     my.curid = 0;
