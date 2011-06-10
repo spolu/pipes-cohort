@@ -1,4 +1,4 @@
-var fwk = require('fwk');
+var fwk = require('pipes');
 
 var config = fwk.baseConfig();
 

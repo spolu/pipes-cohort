@@ -1,7 +1,7 @@
 #!/usr/local/bin/node
 
 var util = require('util');
-var fwk = require('fwk');
+var fwk = require('pipes');
 var mongo = require('mongo');
 var crypto = require('crypto');
 
@@ -27,7 +27,7 @@ var cohort = function(spec, my) {
     my.cfg = cfg.config;
     my.logger = fwk.logger();
     
-    my.pipe = require('pipe').pipe({});
+    my.pipe = require('pipes').pipe({});
     my.mongo = mongo.mongo({ dbname: my.cfg['COHORT_DBNAME'] });
 
     my.sessions = {};
@@ -43,14 +43,14 @@ var cohort = function(spec, my) {
     var capture, getlive, getday, getcounter;
     
     usage = function() {
-	console.log('Usage: cohort <pipereg>');
+	console.log('Usage: cohort <pipesreg>');
 	console.log('');
-	console.log('<pipereg> is the tag used to subscribe');
+	console.log('<pipesreg> is the tag used to subscribe');
 	console.log('to pipe messages for cohort');
 	console.log('');
 	console.log('Config values can be specified in the ENV or');
 	console.log('on the command line using:');
-	console.log('  cohort <pipereg> --KEY=VALUE');
+	console.log('  cohort <pipesreg> --KEY=VALUE');
 	console.log('');
     };
 
@@ -398,7 +398,7 @@ var cohort = function(spec, my) {
 	if(typeof msg.body().month === 'undefined')
 	{ ctx.error(new Error('Invalid req: month missing')); return; }    
 	if(typeof msg.body().year === 'undefined')
-	{ ctx.error(new Error('Invalid req: year missing')); return; }
+	{ ctx.error(new Error('Invalid req: year missing')); return; }	  
 
 	var day = parseInt(msg.body().day, 10);
 	var month = parseInt(msg.body().month, 10);
