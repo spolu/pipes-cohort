@@ -2,7 +2,7 @@
 
 var util = require('util');
 var fwk = require('pipes');
-var mongo = require('mongo');
+var cellar = require('cellar');
 var crypto = require('crypto');
 
 var cfg = require("./config.js");
@@ -28,7 +28,7 @@ var cohort = function(spec, my) {
     my.logger = fwk.logger();
     
     my.pipe = require('pipes').pipe({});
-    my.mongo = mongo.mongo({ dbname: my.cfg['COHORT_DBNAME'] });
+    my.mongo = cellar.mongo({ dbname: my.cfg['COHORT_DBNAME'] });
 
     my.sessions = {};
     my.curid = 0;
