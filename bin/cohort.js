@@ -178,45 +178,45 @@ var cohort = function(spec, my) {
 	var e = {};
 
 	/** update sessions.*** */
-	s.forEach(function(session, user) {
-		      /** 60s inactivity */
-		      if(((new Date()).getTime() - session.end.getTime()) > my.sessionExpiry) {
-			  session.end = new Date();
-			  e[user] = session;
-		      }
-		      else {
-			  my.sessions[user] = session;
-		      }
-		  });
+	fwk.forEach(s, function(session, user) {
+			/** 60s inactivity */
+			if(((new Date()).getTime() - session.end.getTime()) > my.sessionExpiry) {
+			    session.end = new Date();
+			    e[user] = session;
+			}
+			else {
+			    my.sessions[user] = session;
+			}
+		    });
 	
-	e.forEach(function(session, user) {
-		      uhash('removed');
-		      my.mongo.get(
-			  ctx, 'sessions.' + session.id,
-			  function(obj) {
-			      my.mongo.set(ctx, 
-					   'sessions.' + session.id,
-					   obj._hash,
-					   session,
-					   function(status) {
-					       ctx.log.debug('WRITEBACK (exp): [' + session.id + '] ' + user + ' - ' + status);
-					   });
-			  });
-		  });
-	
-	my.sessions.forEach(function(session, user) {
-				my.mongo.get(
-				    ctx, 'sessions.' + session.id,
-				    function(obj) {
-					my.mongo.set(ctx, 
-						     'sessions.' + session.id,
-						     obj._hash,
-						     session,
-						     function(status) {
-							 ctx.log.debug('WRITEBACK: [' + session.id + '] ' + user + ' - ' + status);
-						     });
-				    });			  			  
+	fwk.forEach(e, function(session, user) {
+			uhash('removed');
+			my.mongo.get(
+			    ctx, 'sessions.' + session.id,
+			    function(obj) {
+				my.mongo.set(ctx, 
+					     'sessions.' + session.id,
+					     obj._hash,
+					     session,
+					     function(status) {
+						 ctx.log.debug('WRITEBACK (exp): [' + session.id + '] ' + user + ' - ' + status);
+					     });
 			    });
+		    });
+	
+	fwk.forEach(my.sessions, function(session, user) {
+			my.mongo.get(
+			    ctx, 'sessions.' + session.id,
+			    function(obj) {
+				my.mongo.set(ctx, 
+					     'sessions.' + session.id,
+					     obj._hash,
+					     session,
+					     function(status) {
+						 ctx.log.debug('WRITEBACK: [' + session.id + '] ' + user + ' - ' + status);
+					     });
+			    });			  			  
+		    });
     };
 
     update = function() {
@@ -345,7 +345,7 @@ var cohort = function(spec, my) {
 	    });
 	
 	
-	uhash(item.makehash());
+	uhash(fwk.makehash(item));
 	update();
 
 	cb_({status: 'DONE'});
@@ -447,7 +447,7 @@ var cohort = function(spec, my) {
 		 });	
     };
     
-    that.method('main', main);
+    fwk.method(that, 'main', main);
 
     return that;  
 };
