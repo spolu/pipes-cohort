@@ -113,6 +113,7 @@ var cohort = function(spec, my) {
 	
 	/** error handling */
 	ctx.on('error', function(err) {
+		   //util.debug('CONTEXT ERROR: ' + err.message);
 		   if(msg.type() === '2w') {
 		       var reply = fwk.message.reply(msg);
 		       reply.setBody({ error: err.message });
@@ -434,9 +435,11 @@ var cohort = function(spec, my) {
 	     var dstr = day + 'd' + 
 		 month + 'm' + 
 		 year + 'y' ;
+	     //util.debug('calling counter: ' + 'counters.' + dstr);
 	     my.mongo.get(
 		 ctx, 'counters.' + dstr,
 		 function(obj) {	
+		     //util.debug('done: ' + 'counters.' + dstr);
 		     res.day = obj.data;
 		     cb('done');
 		 });	     
@@ -445,9 +448,11 @@ var cohort = function(spec, my) {
 	(function(cb) {
 	     var mstr = month + 'm' + 
 		 year + 'y';	
+	     //util.debug('calling counter: ' + 'counters.' + mstr);
 	     my.mongo.get(
 		 ctx, 'counters.' + mstr,
 		 function(obj) {	
+		     //util.debug('done: ' + 'counters.' + mstr);
 		     res.month = obj.data;		     
 		     cb('done');
 		 });	     
@@ -455,15 +460,18 @@ var cohort = function(spec, my) {
 
 	(function(cb) {
 	     var ystr = year + 'y';	
+	     //util.debug('calling counter: ' + 'counters.' + ystr);
 	     my.mongo.get(
 		 ctx, 'counters.' + ystr,
 		 function(obj) {	
+		     //util.debug('done: ' + 'counters.' + ystr);
 		     res.year = obj.data;		     
 		     cb('done');
 		 });	     
 	 })(mplex.callback());
 
 	mplex.go(function() {	     	     
+		     //util.debug('RES: ' + util.inspect(res));
 		     cb_(res);
 		 });	
     };

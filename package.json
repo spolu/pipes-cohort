@@ -1,7 +1,7 @@
 {
-  "name": "cohort",
-  "description": "Cohort Session Tracking",
-  "version": "0.1.0",
+  "name": "pipes-cohort",
+  "description": "Pipes Cohort Session Tracking",
+  "version": "0.3.0",
   "author": "Stanislas Polu <stan@bipsly.com>",
   "keywords": ["session", "tracking", "pipe", "mongo"],
   "dependencies": {"pipes": ">= 0.3.0" },
