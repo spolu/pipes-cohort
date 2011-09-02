@@ -23,7 +23,7 @@
 
 var util = require('util');
 var fwk = require('pipes');
-var cellar = require('cellar');
+var cellar = require('pipes-cellar');
 var crypto = require('crypto');
 
 var cfg = require("./config.js");

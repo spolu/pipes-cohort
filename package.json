@@ -1,10 +1,10 @@
 {
   "name": "pipes-cohort",
   "description": "Pipes Cohort Session Tracking",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "author": "Stanislas Polu <stan@bipsly.com>",
   "keywords": ["session", "tracking", "pipe", "mongo"],
-  "dependencies": {"pipes": ">= 0.3.0" },
+  "dependencies": {"pipes": ">= 0.3.0", "pipes-cellar": ">= 0.3.0" },
   "bin" : { "cohort" : "./bin/cohort.js" },
   "engines": { "node": ">=0.4.0" }
 }
