@@ -294,6 +294,10 @@ var cohort = function(spec, my) {
       my.nextid += 1;
     }
     
+    if(my.sessions[user].device === 'unknown' &&
+       device !== 'unknown')
+      my.sessions[user].device = device;
+
     my.sessions[user].end = new Date();
     
     var item = { action: msg.body().action,
