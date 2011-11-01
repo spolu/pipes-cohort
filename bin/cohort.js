@@ -280,13 +280,13 @@ var cohort = function(spec, my) {
     
     var user = msg.targets()[0];
     
-    var type = 'unknown';
-    if(msg.meta() && msg.meta().type)
-      type = msg.meta().type;
+    var device = 'unknown';
+    if(msg.meta() && msg.meta().device)
+      device = msg.meta().device;
     
     if(!my.sessions.hasOwnProperty(user)) {
       my.sessions[user] = { user: user,	
-			    type: type,
+			    device: device,
 			    start: new Date(),
 			    id: my.nextid,			    
 			    log: [] 
