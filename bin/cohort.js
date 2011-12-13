@@ -128,7 +128,7 @@ var cohort = function(spec, my) {
 	
       case 'COH:CAPTURE-1w':
       case 'COH:CAPTURE-2w':
-	ctx.log.out(msg.toString());
+	ctx.log.debug(msg.toString());
 	capture(ctx, msg, function(res) {
 		  if(msg.type() === '2w') {
 		    var reply = fwk.message.reply(msg);
@@ -139,7 +139,7 @@ var cohort = function(spec, my) {
 	break;
 
       case 'COH:GETLIVE-2w':
-	ctx.log.out(msg.toString());
+	ctx.log.debug(msg.toString());
 	getlive(ctx, msg, function(res) {
 		  if(msg.type() === '2w') {
 		    var reply = fwk.message.reply(msg);
@@ -149,7 +149,7 @@ var cohort = function(spec, my) {
 		});
 	break;
       case 'COH:GETDAY-2w':
-	ctx.log.out(msg.toString());
+	ctx.log.debug(msg.toString());
 	getday(ctx, msg, function(res) {
 		 if(msg.type() === '2w') {
 		   var reply = fwk.message.reply(msg);
@@ -159,7 +159,7 @@ var cohort = function(spec, my) {
 	       });
 	break;
       case 'COH:GETCOUNTER-2w':
-	ctx.log.out(msg.toString());
+	ctx.log.debug(msg.toString());
 	getcounter(ctx, msg, function(res) {
 		     if(msg.type() === '2w') {
 		       var reply = fwk.message.reply(msg);
