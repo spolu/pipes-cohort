@@ -61,7 +61,7 @@ var cohort = function(spec, my) {
   
   var usage, main, send, forward;
   var uhash, update, writeback;
-  var capture, getlive, getday, getcounter;
+  var capture, getlive, getday, getcounter, getsum;
   
   usage = function() {
     console.log('Usage: cohort <pipesreg>');
@@ -151,6 +151,16 @@ var cohort = function(spec, my) {
       case 'COH:GETDAY-2w':
 	ctx.log.debug(msg.toString());
 	getday(ctx, msg, function(res) {
+		 if(msg.type() === '2w') {
+		   var reply = fwk.message.reply(msg);
+		   reply.setBody(res);
+		   send(ctx, reply);
+		 }
+	       });
+	break;
+      case 'COH:GETSUM-2w':
+	ctx.log.debug(msg.toString());
+	getsum(ctx, msg, function(res) {
 		 if(msg.type() === '2w') {
 		   var reply = fwk.message.reply(msg);
 		   reply.setBody(res);
@@ -418,6 +428,80 @@ var cohort = function(spec, my) {
 		  function(result) {
 		    cb_({ sessions: result });
 		  });
+  };
+
+  getsum = function(ctx, msg, cb_)  {
+
+    if(!msg.body())
+    { ctx.error(new Error('Invalid req: empty body')); return; }
+    
+    if(typeof msg.body().day === 'undefined')
+    { ctx.error(new Error('Invalid req: day missing')); return; }    
+    if(typeof msg.body().month === 'undefined')
+    { ctx.error(new Error('Invalid req: month missing')); return; }    
+    if(typeof msg.body().year === 'undefined')
+    { ctx.error(new Error('Invalid req: year missing')); return; }
+
+    var day = parseInt(msg.body().day, 10);
+    var month = parseInt(msg.body().month, 10);
+    var year = parseInt(msg.body().year, 10);
+    
+    var beg = new Date(year, month, day);
+    var end = new Date(beg.getTime() + (1000 * 60 * 60 * 24));
+
+    var map = function() {    
+      
+      var dist = function(l1, l2) {
+	var R = 6371;
+	var dLat = (l2[0] - l1[0]) * Math.PI / 180;
+	var dLon = (l2[1] - l1[1]) * Math.PI / 180;
+	var lat1 = l1[0] * Math.PI / 180;
+	var lat2 = l2[0] * Math.PI / 180;
+	
+	var a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.sin(dLon/2) * Math.sin(dLon/2) * Math.cos(lat1) * Math.cos(lat2);
+	var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+	var d = R * c;
+	
+	return d;
+      };
+      
+      var first = true;
+      var d = 0;
+      var loc;
+      for(var i = 0; i < this.log.length; i++) {
+	var l = this.log[i];
+	if(l.action === 'search:query' &&
+	   l.data && l.data.locs && l.data.locs[0] && l.data.locs[0].length >= 2) {
+	  if(!first) {
+	    d += dist(loc, l.data.locs[0]);
+	  } 
+	  loc = l.data.locs[0];
+	  if(first) { first = false; }
+	}	
+      }
+
+      emit(this.id,
+	   { id: this.id,
+	     user: this.user,
+	     device: this.device || 'iOS',
+	     start: this.start,
+	     end: this.end,
+	     count: this.log.length,
+	     miles: d });
+    };
+    
+    var reduce = function(key, values) {      
+      return values[0];
+    };
+        
+    my.mongo.mapreduce(ctx,
+		       'sessions.bootstrap',
+		       map,
+		       reduce,
+		       { query: { 'start': { '$gt': beg, '$lte': end } } },
+		       function(result) {
+			 cb_({ sessions: result });
+		       });    
   };
 
   getcounter = function(ctx, msg, cb_) {
